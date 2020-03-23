@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
 
-  "name": "GitLab Notifier for Google Chrome™",
+  "name": "Fork GitLab Notifier",
   "description": "Notify GitLab events (Commit, Issue, MergeRequest and Milestone)",
   "version": "2.5.1",
 
@@ -11,12 +11,7 @@
     "128": "img/gitlab_logo_128.png"
   },
 
-  "permissions": [
-    "background",
-    "notifications",
-    "http://*/",
-    "https://*/"
-  ],
+  "permissions": ["background", "notifications", "http://*/", "https://*/"],
 
   "options_page": "options.html",
 

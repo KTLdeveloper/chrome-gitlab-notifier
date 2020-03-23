@@ -21,12 +21,12 @@ class GitLab {
       gitlab_path: config.gitlabPath,
       private_token: config.privateToken,
       polling_second: config.pollingSecond,
-      avatar_cache: new AvatarCache(storage),
+      avatar_cache: new AvatarCache(storage)
     });
   }
 
   loadProjects() {
-    if (this.api_path.length > 0){
+    if (this.api_path.length > 0) {
       this.projects = null;
       return this.loadProjectsBase(1, []);
     } else {
@@ -54,31 +54,34 @@ class GitLab {
     // GET /projects
     // https://github.com/gitlabhq/gitlabhq/blob/master/doc/api/projects.md#list-projects
     // NOTE: order_by and sort are supported by v7.7.0+. If no options, order_by created_at DESC
-    return m.request({
-      url: `${this.api_path}/projects`,
-      method: "GET",
-      params: params,
-      headers: {
-        "PRIVATE-TOKEN": this.private_token
-      }
-    }).then((projects) => {
-      all_projects = all_projects.concat(projects);
+    return m
+      .request({
+        url: `${this.api_path}/projects`,
+        method: "GET",
+        params: params,
+        headers: {
+          "PRIVATE-TOKEN": this.private_token
+        }
+      })
+      .then(projects => {
+        all_projects = all_projects.concat(projects);
 
-      if (projects.length < this.per_page) {
-        // final page
-        this.projects = all_projects;
-        return Promise.resolve(all_projects);
-      } else {
-        // paging
-        return this.loadProjectsBase(page + 1, all_projects);
-      }
-    }).catch((e) => {
-      if(!this.projects) {
-        this.projects = [];
-      }
-      alert(e);
-      return Promise.reject();
-    });
+        if (projects.length < this.per_page) {
+          // final page
+          this.projects = all_projects;
+          return Promise.resolve(all_projects);
+        } else {
+          // paging
+          return this.loadProjectsBase(page + 1, all_projects);
+        }
+      })
+      .catch(e => {
+        if (!this.projects) {
+          this.projects = [];
+        }
+        alert(e);
+        return Promise.reject();
+      });
   }
 
   loadTriggers(proj_name) {
@@ -89,17 +92,19 @@ class GitLab {
       headers: {
         "PRIVATE-TOKEN": this.private_token
       }
-    }).then((data) => {
-      this.triggers = data;
-      return Promise.resolve(data);
-    }).catch((e) => {
-      alert(e);
-      return Promise.reject();
-    });
+    })
+      .then(data => {
+        this.triggers = data;
+        return Promise.resolve(data);
+      })
+      .catch(e => {
+        alert(e);
+        return Promise.reject();
+      });
   }
-  
+
   loadBranches(proj_name) {
-    if (this.api_path.length > 0){
+    if (this.api_path.length > 0) {
       this.branches = null;
       var proj_id = encodeURIComponent(proj_name);
       return this.loadBranchesBase(proj_id, 1, []);
@@ -113,52 +118,55 @@ class GitLab {
       page: page,
       per_page: this.per_page
     };
-    // List repository branches 
+    // List repository branches
     // GET /projects/:id/repository/branches
     // https://github.com/gitlabhq/gitlabhq/blob/master/doc/api/branches.md#list-repository-branches
     // NOTE: order_by and sort are supported by v7.7.0+. If no options, order_by created_at DESC
-    return m.request({
-      url: `${this.api_path}/projects/${proj_id}/repository/branches`,
-      method: "GET",
-      params: params,
-      headers: {
-        "PRIVATE-TOKEN": this.private_token
-      }
-    }).then((branches) => {
-      all_branches = all_branches.concat(branches);
+    return m
+      .request({
+        url: `${this.api_path}/projects/${proj_id}/repository/branches`,
+        method: "GET",
+        params: params,
+        headers: {
+          "PRIVATE-TOKEN": this.private_token
+        }
+      })
+      .then(branches => {
+        all_branches = all_branches.concat(branches);
 
-      if (branches.length < this.per_page) {
-        // final page
-        this.branches = all_branches;
-        return Promise.resolve(all_branches);
-      } else {
-        // paging
-        return this.loadBranchesBase(proj_id, page + 1, all_branches);
-      }
-    }).catch((e) => {
-      if(!this.branches) {
-        this.branches = [];
-      }
-      alert(e);
-      return Promise.reject();
-    });
+        if (branches.length < this.per_page) {
+          // final page
+          this.branches = all_branches;
+          return Promise.resolve(all_branches);
+        } else {
+          // paging
+          return this.loadBranchesBase(proj_id, page + 1, all_branches);
+        }
+      })
+      .catch(e => {
+        if (!this.branches) {
+          this.branches = [];
+        }
+        alert(e);
+        return Promise.reject();
+      });
   }
 
   loadAvatarUrls(user_ids) {
     this.avatar_urls = {};
 
-    if(this.api_path.length == 0){
+    if (this.api_path.length == 0) {
       return;
     }
 
-    user_ids.forEach((user_id) => {
+    user_ids.forEach(user_id => {
       const cached_avatar_url = this.avatar_cache.get(user_id);
       if (cached_avatar_url) {
         this.avatar_urls[user_id] = cached_avatar_url;
         return;
       }
 
-      this.getUserAvatarUrl(user_id).then((user) => {
+      this.getUserAvatarUrl(user_id).then(user => {
         this.avatar_cache.set(user_id, user.avatar_url);
         this.avatar_urls[user_id] = user.avatar_url;
       });
@@ -172,7 +180,7 @@ class GitLab {
     return m.request({
       url: `${this.api_path}/users/:user_id`,
       method: "GET",
-      data: {
+      params: {
         user_id: user_id
       },
       headers: {
@@ -181,7 +189,7 @@ class GitLab {
     });
   }
 
-  getProjectEvents(project_id){
+  getProjectEvents(project_id) {
     // Get project events
     // GET /projects/:id/events
     // https://github.com/gitlabhq/gitlabhq/blob/master/doc/api/projects.md#get-project-events
@@ -198,7 +206,7 @@ class GitLab {
     });
   }
 
-  getEventInternalId(args){
+  getEventInternalId(args) {
     // Single issue
     // GET /projects/:id/issues/:issue_id
     // https://github.com/gitlabhq/gitlabhq/blob/master/doc/api/issues.md#single-issue
@@ -212,7 +220,7 @@ class GitLab {
     // https://github.com/gitlabhq/gitlabhq/blob/master/doc/api/milestones.md#get-single-milestone
 
     let api_url;
-    switch(args.target_type) {
+    switch (args.target_type) {
       case "Issue":
         api_url = `${this.api_path}/projects/:project_id/issues/:target_id`;
         break;
@@ -230,41 +238,43 @@ class GitLab {
         break;
     }
 
-    return m.request({
-      url: api_url,
-      method: "GET",
-      params: {
-        project_id: args.project_id,
-        target_id: args.target_id
-      },
-      headers: {
-        "PRIVATE-TOKEN": this.private_token
-      }
-    }).then((res) => {
-      const id = res.iid || res.id;
+    return m
+      .request({
+        url: api_url,
+        method: "GET",
+        params: {
+          project_id: args.project_id,
+          target_id: args.target_id
+        },
+        headers: {
+          "PRIVATE-TOKEN": this.private_token
+        }
+      })
+      .then(res => {
+        const id = res.iid || res.id;
 
-      let url;
-      switch(args.target_type) {
-        case "Issue":
-          url = `${this.gitlab_path}/${args.project_name}/issues/${id}`;
-          break;
-        case "MergeRequest":
-          url = `${this.gitlab_path}/${args.project_name}/merge_requests/${id}`;
-          break;
-        case "Milestone":
-          url = `${this.gitlab_path}/${args.project_name}/milestones/${id}`;
-          break;
-      }
+        let url;
+        switch (args.target_type) {
+          case "Issue":
+            url = `${this.gitlab_path}/${args.project_name}/issues/${id}`;
+            break;
+          case "MergeRequest":
+            url = `${this.gitlab_path}/${args.project_name}/merge_requests/${id}`;
+            break;
+          case "Milestone":
+            url = `${this.gitlab_path}/${args.project_name}/milestones/${id}`;
+            break;
+        }
 
-      return Promise.resolve({target_id: id, target_url: url});
-    });
+        return Promise.resolve({ target_id: id, target_url: url });
+      });
   }
 
-  getCurrentUser(args){
+  getCurrentUser(args) {
     const api_path = args.api_path || this.api_path;
     const private_token = args.private_token || this.private_token;
     return m.request({
-      url:  `${api_path}/user`,
+      url: `${api_path}/user`,
       method: "GET",
       headers: {
         "PRIVATE-TOKEN": private_token
@@ -272,9 +282,9 @@ class GitLab {
     });
   }
 
-  get apiVersion(){
+  get apiVersion() {
     const ret = this.api_path.match(/\/api\/v([0-9]+)$/);
-    if (ret){
+    if (ret) {
       return parseInt(ret[1]);
     }
     return 0;
@@ -283,5 +293,4 @@ class GitLab {
 
 try {
   module.exports = GitLab;
-} catch (e){
-}
+} catch (e) {}
